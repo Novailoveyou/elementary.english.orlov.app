@@ -1,0 +1,19 @@
+{
+  "name": "Elementary",
+  "short_name": "Elementary",
+  "description": "Offline Notion site mirror",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#191919",
+  "theme_color": "#191919",
+  "lang": "en",
+  "icons": [
+    {
+      "src": "./assets/nsp-icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
