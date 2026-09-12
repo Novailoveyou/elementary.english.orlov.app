@@ -1,5 +1,5 @@
 /* nsp service worker */
-const CACHE = "nsp-static-v4";
+const CACHE = "nsp-static-v7";
 
 self.addEventListener("install", (event) => {
   event.waitUntil((async () => {
