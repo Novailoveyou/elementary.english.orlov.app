@@ -8,7 +8,7 @@ name: Sync Notion
 on:
   workflow_dispatch:
   schedule:
-    - cron: "0 */24 * * *"
+    - cron: "0 */48 * * *"
 
 permissions:
   contents: write
