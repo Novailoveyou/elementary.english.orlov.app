@@ -56,12 +56,14 @@
         "https://almond-brownie-c82.notion.site/Free-time-3b715e0e4a098004861bc3d92f68bbe0"
       ]
     },
-    "almond-brownie-c82.notion.site::3b815e0e4a0980d3a793d0420ed9fa6e": {
-      "url": "https://almond-brownie-c82.notion.site/Useful-phrases-3b815e0e4a0980d3a793d0420ed9fa6e",
-      "file": "Useful-phrases-3b815e0e4a0980d3a793d0420ed9fa6e.html",
-      "fingerprint": "cd80dec1e049abd08cf34961b4dba4c7be8709e04e58d790a345a3b05a9d92dc",
+    "almond-brownie-c82.notion.site::6a515e0e4a09828fbed501ebe26ca58b": {
+      "url": "https://almond-brownie-c82.notion.site/Payment-6a515e0e4a09828fbed501ebe26ca58b",
+      "file": "Payment-6a515e0e4a09828fbed501ebe26ca58b.html",
+      "fingerprint": "d8bdb982592cce361c148d2305b3ed5b0882591204dc2cce53c18714b92880f9",
       "links": [
-        "https://almond-brownie-c82.notion.site/Elementary-3b515e0e4a098053bb74c985cebfd777"
+        "https://almond-brownie-c82.notion.site/Elementary-3b515e0e4a098053bb74c985cebfd777",
+        "https://almond-brownie-c82.notion.site/3cd15e0e4a098018a3bde33cf5184c4d",
+        "https://almond-brownie-c82.notion.site/69315e0e4a098389b3d0013ab4382f86"
       ]
     },
     "almond-brownie-c82.notion.site::c8415e0e4a09832da7bc01e76dfebbb5": {
@@ -187,16 +189,6 @@
         "https://almond-brownie-c82.notion.site/2-Questions-3bf15e0e4a0980f1a0fbf824d17e1b4d"
       ]
     },
-    "almond-brownie-c82.notion.site::6a515e0e4a09828fbed501ebe26ca58b": {
-      "url": "https://almond-brownie-c82.notion.site/Payment-6a515e0e4a09828fbed501ebe26ca58b",
-      "file": "Payment-6a515e0e4a09828fbed501ebe26ca58b.html",
-      "fingerprint": "d8bdb982592cce361c148d2305b3ed5b0882591204dc2cce53c18714b92880f9",
-      "links": [
-        "https://almond-brownie-c82.notion.site/Elementary-3b515e0e4a098053bb74c985cebfd777",
-        "https://almond-brownie-c82.notion.site/3cd15e0e4a098018a3bde33cf5184c4d",
-        "https://almond-brownie-c82.notion.site/69315e0e4a098389b3d0013ab4382f86"
-      ]
-    },
     "almond-brownie-c82.notion.site::3cd15e0e4a098018a3bde33cf5184c4d": {
       "url": "https://almond-brownie-c82.notion.site/3cd15e0e4a098018a3bde33cf5184c4d",
       "file": "September-3cd15e0e4a098018a3bde33cf5184c4d.html",
@@ -213,6 +205,14 @@
       "links": [
         "https://almond-brownie-c82.notion.site/Elementary-3b515e0e4a098053bb74c985cebfd777",
         "https://almond-brownie-c82.notion.site/Payment-6a515e0e4a09828fbed501ebe26ca58b"
+      ]
+    },
+    "almond-brownie-c82.notion.site::3b815e0e4a0980d3a793d0420ed9fa6e": {
+      "url": "https://almond-brownie-c82.notion.site/Useful-phrases-3b815e0e4a0980d3a793d0420ed9fa6e",
+      "file": "Useful-phrases-3b815e0e4a0980d3a793d0420ed9fa6e.html",
+      "fingerprint": "cd80dec1e049abd08cf34961b4dba4c7be8709e04e58d790a345a3b05a9d92dc",
+      "links": [
+        "https://almond-brownie-c82.notion.site/Elementary-3b515e0e4a098053bb74c985cebfd777"
       ]
     }
   },
