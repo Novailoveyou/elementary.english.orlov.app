@@ -1121,6 +1121,7 @@
         audio.style.maxWidth = "100%";
         audio.style.display = "block";
         audio.style.pointerEvents = "auto";
+        try { audio.load(); } catch (_) {}
       }
     }
     for (const table of $$(".notion-table-view", root)) {
@@ -1289,15 +1290,24 @@
       return;
     }
     if (!/^https?:/i.test(src)) return;
+    const apply = (local) => {
+      if (!local) return;
+      el.setAttribute("src", local);
+      if (el.tagName === "AUDIO" || el.tagName === "VIDEO") {
+        try { el.load(); } catch (_) {}
+      }
+    };
     const local = localAssetFor(src);
     if (local) {
-      el.setAttribute("src", local);
+      apply(local);
       return;
     }
     // Async: map may still be loading
     loadAssetMap().then(() => {
       const again = localAssetFor(src);
-      if (again && el.getAttribute("src") === src) el.setAttribute("src", again);
+      if (again && (el.getAttribute("src") === src || /^https?:/i.test(el.getAttribute("src") || ""))) {
+        apply(again);
+      }
     });
   }
 
@@ -1679,14 +1689,16 @@
         cursor: pointer;
       }
 
-      /* Emoji / page icons — colorful fonts; don't force fill that can blank them */
+      /* Emoji / page icons — color presentation; don't force text color */
       .notion-record-icon,
       .notion-record-icon span,
       .notion-record-icon [role="img"],
+      .notion-emoji,
       [aria-label="Page icon"] {
         font-family: "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji",
-          "Android Emoji", "Twemoji Mozilla", "Segoe UI Symbol", sans-serif !important;
-        color: var(--c-texPri, var(--c-regEmoCol, currentColor)) !important;
+          "Android Emoji", "Twemoji Mozilla" !important;
+        font-variant-emoji: emoji !important;
+        color: var(--c-regEmoCol, inherit) !important;
         -webkit-text-fill-color: unset !important;
         opacity: 1 !important;
         visibility: visible !important;
@@ -1870,8 +1882,7 @@
         max-width: 100% !important;
         box-sizing: border-box !important;
       }
-      .notion-column_list-block > div > div[style*="opacity: 0"],
-      .notion-column_list-block > div > div[style*="width: 46px"] {
+      .notion-column_list-block > div > div[style*="opacity: 0"][style*="width: 46px"] {
         display: none !important;
         height: 0 !important;
         width: 0 !important;
@@ -1914,6 +1925,10 @@
 
       /* Mobile: stack Notion column layouts + use more of the screen */
       @media (max-width: 900px) {
+        :root, html {
+          --safe-padding-left: 0px !important;
+          --safe-padding-right: 0px !important;
+        }
         .notion-column_list-block > div {
           flex-direction: column !important;
           align-items: stretch !important;
@@ -1925,7 +1940,8 @@
           flex-shrink: 1 !important;
         }
         .layout, .layout-wide {
-          padding-inline: 8px !important;
+          padding-inline: max(0px, env(safe-area-inset-left, 0px))
+            max(0px, env(safe-area-inset-right, 0px)) !important;
         }
         .layout-content {
           padding-inline: 0 !important;
@@ -2061,11 +2077,12 @@
       [data-nsp-peek-body] {
         flex: 1;
         overflow: auto;
-        padding: 16px 20px 48px;
+        padding: 12px 8px 48px;
       }
       [data-nsp-peek-body] .layout,
       [data-nsp-peek-body] .layout-wide {
-        padding-inline: 10px !important;
+        padding-inline: max(0px, env(safe-area-inset-left, 0px))
+          max(0px, env(safe-area-inset-right, 0px)) !important;
         max-width: 100% !important;
         width: 100% !important;
       }
@@ -2141,7 +2158,7 @@
   let peekCurrentHref = "";
   let peekFull = false;
   let peekHistoryDepth = 0;
-  let peekIgnorePop = false;
+  let peekIgnorePops = 0;
   let peekRestoring = false;
   let peekLoadGen = 0;
 
@@ -2224,11 +2241,11 @@
     peekHistoryDepth = 0;
     clearPeekUi();
     if (depth > 0) {
-      peekIgnorePop = true;
+      peekIgnorePops = depth;
       try {
         history.go(-depth);
       } catch (_) {
-        peekIgnorePop = false;
+        peekIgnorePops = 0;
       }
     }
   }
@@ -2237,7 +2254,6 @@
     if (!peekFull) return;
     if (peekHistoryDepth > 0) {
       // Pop the fullscreen entry; popstate restores side/center or closes
-      peekIgnorePop = false;
       history.back();
       return;
     }
@@ -2315,10 +2331,18 @@
     }, 1800);
 
     try {
-      const res = await fetch(fetchUrl, {
-        credentials: "same-origin",
-        cache: "reload",
-      });
+      const controller = new AbortController();
+      const timer = setTimeout(() => controller.abort(), 12_000);
+      let res;
+      try {
+        res = await fetch(fetchUrl, {
+          credentials: "same-origin",
+          cache: "no-store",
+          signal: controller.signal,
+        });
+      } finally {
+        clearTimeout(timer);
+      }
       if (gen !== peekLoadGen) return;
       if (!res.ok) throw new Error("HTTP " + res.status);
       const html = await res.text();
@@ -2387,6 +2411,11 @@
       };
     } catch (err) {
       if (gen !== peekLoadGen) return;
+      // Hard-navigate so users aren't stuck on Loading…
+      try {
+        location.href = href;
+        return;
+      } catch (_) {}
       body.innerHTML =
         '<div style="padding:24px">Could not load page. <a href="' +
         href +
@@ -2397,22 +2426,22 @@
   if (!window.__nspPeekPopstate) {
     window.__nspPeekPopstate = true;
     window.addEventListener("popstate", (ev) => {
-      if (peekIgnorePop) {
-        peekIgnorePop = false;
+      if (peekIgnorePops > 0) {
+        peekIgnorePops -= 1;
         return;
       }
       const st = ev && ev.state;
       if (st && st.nspPeek && st.href) {
         peekHistoryDepth = Math.max(0, peekHistoryDepth - 1);
         peekRestoring = true;
-        try {
-          const mode = st.mode || (st.nspPeekFull ? "full" : peekMode);
-          if (mode === "full") peekFull = true;
-          else peekFull = false;
-          openPeek(st.href, mode === "full" ? "full" : mode);
-        } finally {
-          peekRestoring = false;
-        }
+        const mode = st.mode || (st.nspPeekFull ? "full" : peekMode);
+        if (mode === "full") peekFull = true;
+        else peekFull = false;
+        Promise.resolve(openPeek(st.href, mode === "full" ? "full" : mode))
+          .catch(() => {})
+          .finally(() => {
+            peekRestoring = false;
+          });
         return;
       }
       // Left the peek stack — close UI only (URL already restored)
