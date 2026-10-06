@@ -58,7 +58,7 @@ jobs:
             --url "$NOTION_URL" \
             --out . \
             --keep-cname \
-            --delay-ms 500 \
+            --delay-ms 1500 \
             --retries 5 \
             --concurrency 12
 
