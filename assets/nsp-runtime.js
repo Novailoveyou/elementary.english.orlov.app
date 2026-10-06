@@ -1027,8 +1027,34 @@
     });
   }
 
+  function cleanPageIconLabels(scope) {
+    const root = scope || document;
+    const stripLabel = (s) => (s || "").replace(/s*Pages*icons*/gi, "").trim();
+    // Notion alts / bad freezes leave "🟧 Page icon" as visible text — keep only the glyph
+    for (const el of $$(
+      ".notion-emoji, .notion-record-icon [role='img'], .notion-record-icon span",
+      root,
+    )) {
+      const t = (el.textContent || "").trim();
+      if (!/Pages*icon/i.test(t)) continue;
+      el.textContent = stripLabel(t);
+    }
+    for (const img of $$("img[alt*='Page icon'], img[alt*='Page Icon']", root)) {
+      img.setAttribute("alt", stripLabel(img.getAttribute("alt") || ""));
+    }
+    for (const el of $$(
+      "[aria-label*='Page icon'], [aria-label*='Page Icon']",
+      root,
+    )) {
+      const cleaned = stripLabel(el.getAttribute("aria-label") || "");
+      if (cleaned) el.setAttribute("aria-label", cleaned);
+      else el.removeAttribute("aria-label");
+    }
+  }
+
   function enhanceMedia(scope) {
     const root = scope || document;
+    cleanPageIconLabels(root);
     repairBlockMedia(root);
     for (const img of $$(
       [
@@ -1693,8 +1719,7 @@
       .notion-record-icon,
       .notion-record-icon span,
       .notion-record-icon [role="img"],
-      .notion-emoji,
-      [aria-label="Page icon"] {
+      .notion-emoji {
         font-family: "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji",
           "Android Emoji", "Twemoji Mozilla" !important;
         font-variant-emoji: emoji !important;
@@ -2523,6 +2548,7 @@
     wireOriginalMenu();
     layoutTopbar();
     wireOriginalMenu();
+    cleanPageIconLabels(document);
     wireToggles(document);
     wireToc();
     wireLightbox();
