@@ -60,7 +60,7 @@ jobs:
             --keep-cname \
             --delay-ms 1500 \
             --retries 5 \
-            --concurrency 12
+            --concurrency 12 \
             --full
 
       - name: Commit & push
