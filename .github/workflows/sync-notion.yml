@@ -59,7 +59,7 @@ jobs:
             --out . \
             --keep-cname \
             --delay-ms 1500 \
-            --retries 5 \
+            --retries 10 \
             --concurrency 12 \
             --full
 
