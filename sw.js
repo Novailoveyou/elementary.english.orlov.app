@@ -1,5 +1,5 @@
 /* nsp service worker */
-const CACHE = "nsp-static-v10";
+const CACHE = "nsp-static-v11";
 const PRECACHE_CONCURRENCY = 4;
 
 async function mapPool(items, limit, fn) {
@@ -17,6 +17,7 @@ async function mapPool(items, limit, fn) {
 async function cacheUrls(urls, opts) {
   const cache = await caches.open(CACHE);
   const mode = (opts && opts.reload) ? "reload" : "default";
+  const force = !!(opts && opts.reload);
   await mapPool(urls, PRECACHE_CONCURRENCY, async (url) => {
     if (!url || typeof url !== "string") return;
     try {
@@ -24,10 +25,27 @@ async function cacheUrls(urls, opts) {
       if (/googletagmanager|google-analytics|doubleclick|ads-twitter|facebook\.net|facebook\.com\/tr/i.test(url)) {
         return;
       }
+      // Skip already-cached URLs unless install explicitly reloads
+      if (!force) {
+        const hit = await cache.match(url, { ignoreSearch: true });
+        if (hit) return;
+      }
       const r = await fetch(url, { cache: mode });
       if (r && r.ok) await cache.put(url, r);
     } catch (_) {}
   });
+}
+
+function isShellRequest(req, url) {
+  if (req.mode === "navigate") return true;
+  const p = url.pathname;
+  return (
+    /\/sw\.js$/i.test(p) ||
+    /nsp-runtime\.js$/i.test(p) ||
+    /nsp-precache\.json$/i.test(p) ||
+    /manifest\.webmanifest$/i.test(p) ||
+    /\.html$/i.test(p)
+  );
 }
 
 self.addEventListener("install", (event) => {
@@ -79,6 +97,29 @@ self.addEventListener("fetch", (event) => {
     return;
   }
 
+  // HTML + runtime + SW + manifest: network-first so deploys are not stuck in cache
+  if (isShellRequest(req, url)) {
+    event.respondWith((async () => {
+      const cache = await caches.open(CACHE);
+      try {
+        const fresh = await fetch(req, { cache: "no-cache" });
+        if (fresh && fresh.ok) {
+          cache.put(req, fresh.clone()).catch(() => {});
+        }
+        return fresh;
+      } catch (err) {
+        const cached = await cache.match(req, { ignoreSearch: true });
+        if (cached) return cached;
+        if (req.mode === "navigate") {
+          const index = await cache.match("./index.html");
+          if (index) return index;
+        }
+        throw err;
+      }
+    })());
+    return;
+  }
+
   event.respondWith((async () => {
     const cache = await caches.open(CACHE);
     const cached = await cache.match(req, { ignoreSearch: true });
@@ -100,7 +141,6 @@ self.addEventListener("fetch", (event) => {
       }
       return fresh;
     } catch (err) {
-      // Offline fallback to index for navigations
       if (req.mode === "navigate") {
         const index = await cache.match("./index.html");
         if (index) return index;
